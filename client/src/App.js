@@ -1,7 +1,7 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Row, Modal } from 'react-bootstrap';
+import { Form, Button, Row, Modal, ModalBody } from 'react-bootstrap';
 import {
   BrowserRouter as Router,
   Switch,
@@ -61,6 +61,8 @@ function App() {
             <>{loggedIn ? < SurveyPublied /> : <LogIn login={doLogIn} />} </>} />
           <Route path="/check-survey/:surveyId" render={() =>
             <>{loggedIn ? <AllResponseCheck /> : <LogIn login={doLogIn} />} </>} />
+          <Route path="/new" render={() =>
+            <> {loggedIn ? <NewSurvey /> : <LogIn login={doLogIn} />} </>} />
         </Switch>
       </Router>
 
@@ -501,6 +503,11 @@ function AnswerDisplay(props) {
 // List of all Surveys publied by the user logged in --> SideBar + SurveyCheck/Survey
 function SurveyPublied(props) {
   const [surveyList, setSurveyList] = useState([]);
+  const [redirect, setRedirect] = useState(false);
+
+  const handleClick = () => {
+    setRedirect(true);
+  };
 
   useEffect(() => {
     const getSurvey = async () => {
@@ -513,11 +520,18 @@ function SurveyPublied(props) {
 
   return (
     <div className='row col-12'>
+      {redirect ? <Redirect to="/new" /> : ""}
       <SideBar />
       <main className='col-9'>
         {surveyList.length !== 0 ?
           <ul> {surveyList.map(s => <SurveyCheck survey={s} />)} </ul> : <p> You have not uploaded any survey yet. </p>
         }
+
+        <button className='btn btn-primary btn-lg' onClick={handleClick}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" fill="currentColor" className="bi bi-plus-lg mr-2" viewBox="0 0 16 16">
+            <path d="M8 0a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2H9v6a1 1 0 1 1-2 0V9H1a1 1 0 0 1 0-2h6V1a1 1 0 0 1 1-1z" />
+          </svg>
+          Create a Survey</button>
       </main>
     </div>
   );
@@ -615,19 +629,19 @@ function AllResponseCheck(props) {
       <div className='row mt-3'>
         <div className='col'>
           {index === 0 ?
-            <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" fill="#D9E2Ef" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" fill="#D9E2Ef" className="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16">
               <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z" />
             </svg> :
-            <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" fill="#0275D8" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16" onClick={handleClickLeft}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" fill="#0275D8" className="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16" onClick={handleClickLeft}>
               <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z" />
             </svg>
           }
           <span className='ml-2 mr-2'>  {index + 1} / {responseList.length}  </span>
           {index === responseList.length - 1 ?
-            <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" fill="#D9E2Ef" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" fill="#D9E2Ef" className="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16">
               <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z" />
             </svg> :
-            <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" fill="#0275D8" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16" onClick={handleClickRight}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" fill="#0275D8" className="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16" onClick={handleClickRight}>
               <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z" />
             </svg>
           }
@@ -687,7 +701,7 @@ function ClosedResponseDisplay(props) {
       <label className='form-control'>{props.question.title}</label>
       <div className='col' align='left'>
         {answersList.length !== 0 ? <div> {answersList.map((a) =>
-          <AnswerCheck key={a.key} answer={a} response={JSON.parse(props.response.content)[a.key -1]}/>
+          <AnswerCheck key={a.key} answer={a} response={JSON.parse(props.response.content)[a.key - 1]} />
         )} </div> : <p>{answersList.length}</p>}
       </div>
     </div>
@@ -698,12 +712,268 @@ function ClosedResponseDisplay(props) {
 function AnswerCheck(props) {
   return (
     <div className="form-check">
-      <input className="form-check-input" type="checkbox" readOnly checked={props.response}/>
+      <input className="form-check-input" type="checkbox" readOnly checked={props.response} />
       <label className="form-check-label">
         {props.answer.value}
       </label>
     </div>
   );
+}
+
+function NewSurvey(props) {
+  const [title, setTitle] = useState("")
+  const [questionList, setQuestionList] = useState([])
+  const [valid, setValid] = useState(false)
+  const [show, setShow] = useState(false)
+  const [modified, setModified] = useState(false)
+
+  const handleSubmit = () => {
+
+  }
+
+  const handleDelete = (id) => {
+    questionList.splice(id, 1);
+    setModified(true);
+  }
+
+  const handleDown = (id) => {
+    if (id < questionList.length - 1) {
+      let temp = questionList[id]
+      questionList[id] = questionList[id + 1]
+      questionList[id + 1] = temp
+    }
+    setModified(true);
+  }
+
+  const handleUp = (id) => {
+    if (id > 0) {
+      let temp = questionList[id]
+      questionList[id] = questionList[id - 1]
+      questionList[id - 1] = temp
+    }
+    setModified(true);
+  }
+
+  const modifyQuestionTitle = (id, title) => {
+    questionList[id].title = title;
+    setModified(true);
+  }
+
+  const modifyMandatory = (id) => {
+    if (questionList[id].mandatory) {
+      questionList[id].mandatory = false;
+    } else {
+      questionList[id].mandatory = true;
+    }
+  }
+
+  const setMax = (id, value) => {
+    questionList[id].max = value
+  }
+
+  const setMin = (id, value) => {
+    questionList[id].min = value
+  }
+
+  const setContent = (id, content) => {
+    questionList[id].content = content
+  }
+
+  const AddOpenQuestion = () => {
+    questionList.push({
+      title: "",
+      type: "open",
+      mandatory: false,
+      content: ""
+    })
+    setShow(false);
+  }
+
+  const AddClosedQuestion = () => {
+    questionList.push({
+      title: "",
+      type: "closed",
+      mandatory: false,
+      content: "[]",
+      min: 0,
+      max: 0
+    })
+    setShow(false);
+  }
+
+  useEffect(() => {
+    setModified(false);
+  }, [modified])
+
+  return (
+    <div className='row'>
+      <div className='col-1' />
+      <div className='col-10'>
+        <form className='form-group' onSubmit={handleSubmit}>
+          <div className='form-group row mt-4 mb-4'>
+            <Modal show={show} onHide={() => setShow(false)} animation={false}>
+              <Modal.Header closeButton>
+                <Modal.Title>What type of question ?</Modal.Title>
+              </Modal.Header>
+              <ModalBody>
+                <button className='btn btn-primary form-control mt-2' onClick={AddOpenQuestion}>Open Question</button>
+                <button className='btn btn-primary form-control mt-2' onClick={AddClosedQuestion}>Closed Question</button>
+              </ModalBody>
+            </Modal>
+            <label className='col-4' htmlFor={"title"}>Enter the title of the survey :</label>
+            <input type='text' className='form-control col-7' id='title' value={title} onChange={ev => setTitle(ev.target.value)} />
+          </div>
+          {questionList.length !== 0 ? <ul className='list-unstyled'> {questionList.map(q =>
+            <li>
+              <div className='row'>
+                <div className='col-9'>
+                  {q.type === "open" ? <OpenQuestionCreator id={questionList.indexOf(q)} question={q} modifyTitle={modifyQuestionTitle} modifyMandatory={modifyMandatory} /> :
+                    <ClosedQuestionCreator id={questionList.indexOf(q)} question={q} modifyTitle={modifyQuestionTitle} modifyMandatory={modifyMandatory} setMax={setMax} setMin={setMin} setContent={setContent} />}
+                </div>
+                <div className='col-3'>
+                  {questionList.indexOf(q) === 0 ? <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" fill="#D9E2Ef" className="bi bi-arrow-up-short" viewBox="0 0 16 16">
+                    <path fillRule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5z" />
+                  </svg>
+                    : <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" fill="#0275D8" className="bi bi-arrow-up-short" viewBox="0 0 16 16" onClick={() => handleUp(questionList.indexOf(q))}>
+                      <path fillRule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5z" />
+                    </svg>}
+                  {questionList.indexOf(q) === questionList.length - 1 ?
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" fill="#D9E2Ef" className="bi bi-arrow-down-short" viewBox="0 0 16 16">
+                      <path fillRule="evenodd" d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4z" />
+                    </svg>
+                    : <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" fill="#0275D8" className="bi bi-arrow-down-short" viewBox="0 0 16 16" onClick={() => handleDown(questionList.indexOf(q))}>
+                      <path fillRule="evenodd" d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4z" />
+                    </svg>}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" fill="#DF4759" className="bi bi-x-octagon ml-2" viewBox="0 0 16 16" onClick={() => handleDelete(questionList.indexOf(q))}>
+                    <path d="M4.54.146A.5.5 0 0 1 4.893 0h6.214a.5.5 0 0 1 .353.146l4.394 4.394a.5.5 0 0 1 .146.353v6.214a.5.5 0 0 1-.146.353l-4.394 4.394a.5.5 0 0 1-.353.146H4.893a.5.5 0 0 1-.353-.146L.146 11.46A.5.5 0 0 1 0 11.107V4.893a.5.5 0 0 1 .146-.353L4.54.146zM5.1 1 1 5.1v5.8L5.1 15h5.8l4.1-4.1V5.1L10.9 1H5.1z" />
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                  </svg>
+                </div>
+              </div>
+            </li>
+          )}</ul> : ""}
+          <div className='row'>
+            <div className='col'>
+              <button className='btn btn-primary mt-4 mb-4' type='button' onClick={() => setShow(true)}>Add a question</button>
+            </div>
+          </div>
+          <div className='row'>
+            <div className='col'>
+              {valid ? <button className='btn btn-primary' type='submit'>Submit</button> :
+                <> {title.length === 0 ? <p className='text-danger'> Your Survey needs a title </p> : ""}
+                  {!valid ? <p className='text-danger'> Your Survey is not valid </p> : ""}
+                  <button className='btn btn-secondary'>Submit</button> </>}
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function OpenQuestionCreator(props) {
+  return (
+    <div className='row form-group mb-4 mt-4'>
+      <label className='col-2'>Question : </label>
+      <input type='text' className='form-control col-10' id='title' value={props.question.title} onChange={ev => props.modifyTitle(props.id, ev.target.value)} />
+      <div className='form-check'>
+        <input className="form-check-input" type="checkbox" onClick={() => props.modifyMandatory(props.id)} />
+        <label className="form-check-label"> The question is mandatory. </label>
+      </div>
+      <textarea className="form-control mt-1" rows="3" value="The answer will be written here." readOnly></textarea>
+    </div>
+  );
+}
+
+function ClosedQuestionCreator(props) {
+  const [answersList, setAnswersList] = useState(JSON.parse(props.question.content));
+  const [numberList, setNumberList] = useState([0]);
+  const [modified, setModified] = useState(false);
+
+  console.log(JSON.parse(props.question.content));
+
+  const modifyAnswer = (id, answer) => {
+    answersList[id].value = answer;
+    setModified(true);
+  }
+
+  const AddAnswer = () => {
+    answersList.push({
+      key: answersList.length + 1,
+      value: ""
+    });
+    setModified(true);
+  }
+
+  const setMin = (value) => {
+    props.setMin(props.id, value);
+    setModified(true)
+  }
+
+  const setMax = (value) => {
+    props.setMax(props.id, value);
+    setModified(true)
+  }
+
+  useEffect(() => {
+    let result = [];
+    for (let i = 0; i <= answersList.length; i++) {
+      result.push(i)
+    }
+    setNumberList(result)
+  }, [modified]);
+
+  useEffect(() => {
+    setModified(false);
+    props.setContent(props.id, JSON.stringify(answersList));
+  }, [modified])
+
+  return (
+    <div className='row form-group mb-4 mt-4'>
+      <label className='col-2'>Question : </label>
+      <input type='text' className='form-control col-10' id='title' value={props.question.title} onChange={ev => props.modifyTitle(props.id, ev.target.value)} />
+      <div className='form-check mt-2'>
+        <input className="form-check-input" type="checkbox" onClick={() => props.modifyMandatory(props.id)} />
+        <label className="form-check-label"> The question is mandatory. </label>
+      </div>
+      <div className='form-check'>
+        <label className='form-check'>You have to provide between
+          <select className="form-control-sm" onChange={ev => setMin(ev.target.value)}>
+            {numberList.map(n =>
+              <>{props.question.max === 0 ? <option key={n}> {n} </option> :
+                <>{n <= props.question.max ? <option key={n}> {n} </option> : ""} </>
+              }</>
+            )}
+          </select> and <select className="form-control-sm" onChange={ev => setMax(ev.target.value)}>
+            {numberList.map(n =>
+              <>{props.question.min === 0 ? <option key={n}> {n} </option> :
+                <>{n >= props.question.min ? <option key={n}> {n} </option> : ""} </>
+              }</>
+            )}
+          </select> answers. </label>
+      </div>
+      <div className='row'>
+        <div className='col'>
+        {answersList.length !== 0 ?
+          <ul className='list-unstyled'>
+            <li>{answersList.map(a =>
+              <AnswerCreation id={answersList.indexOf(a)} answer={a} modifyAnswer={modifyAnswer} />)}
+            </li>
+          </ul>
+          : ""}
+        </div>
+      </div>
+      <div className='row'>
+        <button type='button' className='btn btn-primary form-control' onClick={AddAnswer}>Add an answer</button>
+      </div>
+    </div>
+  );
+}
+
+function AnswerCreation(props) {
+  return (
+      <input type='text' className='form-control' id='answer' value={props.answer.title} onChange={ev => props.modifyAnswer(props.id, ev.target.value)} />
+  )
 }
 
 export default App;
