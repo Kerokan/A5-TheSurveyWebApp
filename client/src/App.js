@@ -765,6 +765,19 @@ function NewSurvey(props) {
     } else {
       questionList[id].mandatory = true;
     }
+    setModified(true)
+  }
+
+  const AddAnswer = (id) => {
+    questionList[id].content.push({
+      value: ""
+    });
+    setModified(true);
+  }
+
+  const modifyAnswer = (id, answerId, answer) => {
+    questionList[id].content[answerId].value = answer;
+    setModified(true);
   }
 
   const setMax = (id, value) => {
@@ -794,7 +807,7 @@ function NewSurvey(props) {
       title: "",
       type: "closed",
       mandatory: false,
-      content: "[]",
+      content: [],
       min: 0,
       max: 0
     })
@@ -828,7 +841,7 @@ function NewSurvey(props) {
               <div className='row'>
                 <div className='col-9'>
                   {q.type === "open" ? <OpenQuestionCreator id={questionList.indexOf(q)} question={q} modifyTitle={modifyQuestionTitle} modifyMandatory={modifyMandatory} /> :
-                    <ClosedQuestionCreator id={questionList.indexOf(q)} question={q} modifyTitle={modifyQuestionTitle} modifyMandatory={modifyMandatory} setMax={setMax} setMin={setMin} setContent={setContent} />}
+                    <ClosedQuestionCreator id={questionList.indexOf(q)} question={q} modifyTitle={modifyQuestionTitle} modifyMandatory={modifyMandatory} setMax={setMax} setMin={setMin} setContent={setContent} AddAnswer={AddAnswer} modifyAnswer={modifyAnswer} />}
                 </div>
                 <div className='col-3'>
                   {questionList.indexOf(q) === 0 ? <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" fill="#D9E2Ef" className="bi bi-arrow-up-short" viewBox="0 0 16 16">
@@ -877,7 +890,7 @@ function OpenQuestionCreator(props) {
       <label className='col-2'>Question : </label>
       <input type='text' className='form-control col-10' id='title' value={props.question.title} onChange={ev => props.modifyTitle(props.id, ev.target.value)} />
       <div className='form-check'>
-        <input className="form-check-input" type="checkbox" onClick={() => props.modifyMandatory(props.id)} />
+        <input className="form-check-input" type="checkbox" onClick={() => props.modifyMandatory(props.id)} checked={props.question.mandatory}/>
         <label className="form-check-label"> The question is mandatory. </label>
       </div>
       <textarea className="form-control mt-1" rows="3" value="The answer will be written here." readOnly></textarea>
@@ -886,22 +899,17 @@ function OpenQuestionCreator(props) {
 }
 
 function ClosedQuestionCreator(props) {
-  const [answersList, setAnswersList] = useState(JSON.parse(props.question.content));
+  const [answersList, setAnswersList] = useState([]);
   const [numberList, setNumberList] = useState([0]);
   const [modified, setModified] = useState(false);
 
-  console.log(JSON.parse(props.question.content));
-
-  const modifyAnswer = (id, answer) => {
-    answersList[id].value = answer;
+  const modifyAnswer = (answerId, answer) => {
+    props.modifyAnswer(props.id, answerId, answer)
     setModified(true);
   }
 
   const AddAnswer = () => {
-    answersList.push({
-      key: answersList.length + 1,
-      value: ""
-    });
+    props.AddAnswer(props.id);
     setModified(true);
   }
 
@@ -917,7 +925,7 @@ function ClosedQuestionCreator(props) {
 
   useEffect(() => {
     let result = [];
-    for (let i = 0; i <= answersList.length; i++) {
+    for (let i = 0; i <= props.question.content.length; i++) {
       result.push(i)
     }
     setNumberList(result)
@@ -925,26 +933,33 @@ function ClosedQuestionCreator(props) {
 
   useEffect(() => {
     setModified(false);
-    props.setContent(props.id, JSON.stringify(answersList));
+    //props.setContent(props.id, JSON.stringify(answersList));
   }, [modified])
+
+  /*useEffect(() => {
+    answersList.splice(0, answersList.length)
+    answersList.push(JSON.parse(props.question.content));
+    console.log(props.id)
+    console.log(answersList)
+  }, [props.question])*/
 
   return (
     <div className='row form-group mb-4 mt-4'>
       <label className='col-2'>Question : </label>
       <input type='text' className='form-control col-10' id='title' value={props.question.title} onChange={ev => props.modifyTitle(props.id, ev.target.value)} />
       <div className='form-check mt-2'>
-        <input className="form-check-input" type="checkbox" onClick={() => props.modifyMandatory(props.id)} />
+        <input className="form-check-input" type="checkbox" onClick={() => props.modifyMandatory(props.id)} checked={props.question.mandatory}/>
         <label className="form-check-label"> The question is mandatory. </label>
       </div>
       <div className='form-check'>
         <label className='form-check'>You have to provide between
-          <select className="form-control-sm" onChange={ev => setMin(ev.target.value)}>
+          <select className="form-control-sm" value={props.question.min} onChange={ev => setMin(ev.target.value)}>
             {numberList.map(n =>
               <>{props.question.max === 0 ? <option key={n}> {n} </option> :
                 <>{n <= props.question.max ? <option key={n}> {n} </option> : ""} </>
               }</>
             )}
-          </select> and <select className="form-control-sm" onChange={ev => setMax(ev.target.value)}>
+          </select> and <select className="form-control-sm" value={props.question.max} onChange={ev => setMax(ev.target.value)}>
             {numberList.map(n =>
               <>{props.question.min === 0 ? <option key={n}> {n} </option> :
                 <>{n >= props.question.min ? <option key={n}> {n} </option> : ""} </>
@@ -954,11 +969,12 @@ function ClosedQuestionCreator(props) {
       </div>
       <div className='row'>
         <div className='col'>
-        {answersList.length !== 0 ?
+        {props.question.content.length !== 0 ?
           <ul className='list-unstyled'>
-            <li>{answersList.map(a =>
-              <AnswerCreation id={answersList.indexOf(a)} answer={a} modifyAnswer={modifyAnswer} />)}
-            </li>
+            {props.question.content.map(a =>
+            <li>
+              <input type='text' className='text' id='answer' value={a.value} onChange={ev => modifyAnswer(props.question.content.indexOf(a), ev.target.value)} />
+            </li>)}
           </ul>
           : ""}
         </div>
@@ -968,12 +984,6 @@ function ClosedQuestionCreator(props) {
       </div>
     </div>
   );
-}
-
-function AnswerCreation(props) {
-  return (
-      <input type='text' className='form-control' id='answer' value={props.answer.title} onChange={ev => props.modifyAnswer(props.id, ev.target.value)} />
-  )
 }
 
 export default App;
