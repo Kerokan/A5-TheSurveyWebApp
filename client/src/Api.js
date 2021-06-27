@@ -1,5 +1,4 @@
 async function logIn(credentials) {
-    console.log(credentials)
     let response = await fetch('/login', {
         method: 'POST',
         headers: {

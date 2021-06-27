@@ -736,6 +736,7 @@ function AnswerCheck(props) {
   );
 }
 
+// Allow the administrator to create a new survey --> Title + OpenQuestionCreator + ClosedQuestionCreator + Submit Button
 function NewSurvey(props) {
   const [title, setTitle] = useState("");
   const [questionList, setQuestionList] = useState([]);
@@ -960,6 +961,7 @@ function NewSurvey(props) {
   );
 }
 
+// Allow the administrator to create an open question --> Title + options
 function OpenQuestionCreator(props) {
   return (
     <div className='row form-group mb-4 mt-4'>
@@ -974,6 +976,7 @@ function OpenQuestionCreator(props) {
   );
 }
 
+// Allow the administrator to create a closed question --> Title + options
 function ClosedQuestionCreator(props) {
   const [answersList, setAnswersList] = useState([]);
   const [numberList, setNumberList] = useState([0]);
@@ -1022,13 +1025,6 @@ function ClosedQuestionCreator(props) {
     setModified(false);
     //props.setContent(props.id, JSON.stringify(answersList));
   }, [modified])
-
-  /*useEffect(() => {
-    answersList.splice(0, answersList.length)
-    answersList.push(JSON.parse(props.question.content));
-    console.log(props.id)
-    console.log(answersList)
-  }, [props.question])*/
 
   return (
     <div className='row form-group mb-4 mt-4'>

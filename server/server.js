@@ -122,7 +122,7 @@ app.get('/numberResponses/:id', (req, res) => {
     })
 })
 
-app.get('/responseList/:id', (req, res) => {
+app.get('/responseList/:id', isLoggedIn, (req, res) => {
     surveyDAO.getResponseList(req.params.id, req.user.id).then((result) => {
         res.status(200).json(result)
     })
