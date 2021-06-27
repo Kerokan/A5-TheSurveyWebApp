@@ -116,9 +116,9 @@ exports.getSurveyPublied = (id) => {
     })
 };
 
-exports.getResponseList = (id) => {
+exports.getResponseList = (id, userId) => {
     return new Promise((resolve, reject) => {
-        const query = `SELECT DISTINCT sId FROM responses where questionId IN (SELECT questionId FROM questions where surveyid = "${id}")`
+        const query = `SELECT DISTINCT sId FROM responses where questionId IN (SELECT questionId FROM questions AS q JOIN survey AS s WHERE s.surveyId = q.surveyId AND q.surveyid = "${id}" AND s.userId = "${userId}")`
         database.all(query, (err, rows) => {
             if(err) {
                 reject(err);
@@ -140,4 +140,83 @@ exports.getResponseById = (id) => {
             }
         })
     })
+}
+
+exports.postSurvey = (title, userId) => {
+    return new Promise((resolve, reject) => {
+        const getMaxId = `SELECT MAX(surveyId) as max FROM survey`;
+        database.all(getMaxId, (err, row) => {
+            if(err) {
+                reject(err);
+            } else {
+                const maxId = row[0].max + 1;
+                const query = `INSERT INTO survey VALUES(${maxId}, "${title}", ${userId})`;
+                database.run(query, (err) => {
+                    if(err) {
+                        reject(err);
+                    } else {
+                        resolve(maxId);
+                    }
+                });
+            }
+        });
+    });
+}
+
+exports.postOpenQuestion = (question, questionList, surveyId) => {
+    return new Promise((resolve, reject) => {
+        const getMaxId = `SELECT MAX(questionId) as max FROM questions`;
+        database.all(getMaxId, (err, row) => {
+            if(err) {
+                reject(err);
+            } else {
+                const maxId = row[0].max + 1 + questionList.indexOf(question);
+                const mandatory = question.mandatory ? 1 : 0
+                const query = `INSERT INTO questions VALUES(${maxId}, "${surveyId}", "${question.title}", 1, ${mandatory})`;
+                database.run(query, (err) => {
+                    if(err) {
+                        reject(err);
+                    } else {
+                        resolve(maxId);
+                    }
+                });
+            }
+        });
+    });
+}
+
+exports.postClosedQuestion = (question, questionList, surveyId) => {
+    return new Promise((resolve, reject) => {
+        const getMaxId = `SELECT MAX(questionId) as max FROM questions`;
+        database.all(getMaxId, (err, row) => {
+            if(err) {
+                reject(err);
+            } else {
+                const maxId = row[0].max + 1 + questionList.indexOf(question);
+                const mandatory = question.mandatory ? 1 : 0
+                const query = `INSERT INTO questions VALUES(${maxId}, "${surveyId}", "${question.title}", 0, ${mandatory})`;
+                database.run(query, (err) => {
+                    if(err) {
+                        reject(err);
+                    } else {
+                        const content = []
+                        question.content.forEach(answer => {
+                            content.push({
+                                "key": question.content.indexOf(answer) + 1,
+                                "value": answer.value
+                            });
+                        });
+                        const query2 = `INSERT INTO answers VALUES(${maxId}, ${question.min}, ${question.max}, '${JSON.stringify(content)}')`;
+                        database.run(query2, (err) => {
+                            if(err) {
+                                reject(err);
+                            } else {
+                                resolve(maxId);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
 }

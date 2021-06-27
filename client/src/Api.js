@@ -136,7 +136,21 @@ async function getResponseById(id) {
     }
 }
 
+async function postNewSurvey(title, questionList) {
+    const body = {
+        title: title,
+        questions: questionList
+    }
+    const response1 = await fetch('/survey', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body)
+    });
+}
+
 const API = {logIn, logOut, getUserInfo, getAllSurvey, getSurveyById,
        getQuestionList, getAnswersList, sendResponse, getAuthor, getNumberResponses,
-        getSurveyPublied, getResponseList, getResponseById};
+        getSurveyPublied, getResponseList, getResponseById, postNewSurvey};
 export default API;

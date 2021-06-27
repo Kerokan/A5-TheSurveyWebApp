@@ -1,5 +1,7 @@
 'use strict'
 
+//If you read this line, please, don't try SQL injections, it will work :(
+
 const express = require('express');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -40,7 +42,7 @@ const PORT = 3001;
 app.use(express.json());
 
 const isLoggedIn = (req, res, next) => {
-    if (req.isAuthenticated()){
+    if (req.isAuthenticated()) {
         return next();
     }
     return res.status(401).json({ error: 'not authenticated' });
@@ -63,6 +65,19 @@ app.get('/survey', (req, res) => {
         res.status(200).json(result);
     });
 });
+
+app.post('/survey', isLoggedIn, (req, res) => {
+    surveyDAO.postSurvey(req.body.title, req.user.id).then((surveyId) => {
+        req.body.questions.forEach(question => {
+            if (question.type === 'open') {
+                surveyDAO.postOpenQuestion(question, req.body.questions, surveyId)
+            } else {
+                surveyDAO.postClosedQuestion(question, req.body.questions, surveyId)
+            }
+        });
+        res.status(200);
+    });
+})
 
 app.get('/survey/:id', (req, res) => {
     surveyDAO.getInfo(req.params.id).then((result) => {
@@ -90,7 +105,9 @@ app.get('/answers/:id', (req, res) => {
 });
 
 app.post('/response', (req, res) => {
-    surveyDAO.postResponse(req.body);
+    surveyDAO.postResponse(req.body).then(() => {
+        res.status(200);
+    })
 });
 
 app.get('/author/:id', (req, res) => {
@@ -106,7 +123,7 @@ app.get('/numberResponses/:id', (req, res) => {
 })
 
 app.get('/responseList/:id', (req, res) => {
-    surveyDAO.getResponseList(req.params.id).then((result) => {
+    surveyDAO.getResponseList(req.params.id, req.user.id).then((result) => {
         res.status(200).json(result)
     })
 });
@@ -122,7 +139,7 @@ app.post('/login', passport.authenticate('local'), async (req, res) => {
 });
 
 app.get('/current', (req, res) => {
-    if(req.isAuthenticated()) {
+    if (req.isAuthenticated()) {
         res.status(200).json(req.user);
     } else {
         res.status(401);
@@ -137,5 +154,4 @@ app.delete('/current', (req, res) => {
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-    console.log('Check the useEffect() in OpenQuestionDisplay with non mandatory question !!')
 });

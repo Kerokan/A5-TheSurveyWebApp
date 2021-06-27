@@ -45,3 +45,17 @@ html,body
     padding: 0px;
     overflow-x: hidden; 
 } 
+
+.nav-link{
+  text-align: center;
+  font-weight: bolder;
+  margin: 2px;
+  color: #0275D8;
+  background-color: #efefef;
+  border-radius: 3px;
+}
+
+.nav-link:hover{
+  color: #0275D8;
+  background-color: white;
+}
