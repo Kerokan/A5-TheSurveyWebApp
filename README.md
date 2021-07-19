@@ -1,5 +1,6 @@
 # Exam #1: "Survey"
-## Student: s286615 CAM MARTIN
+### Project made by Martin CAM
+---
 
 ## React Client Application Routes
 
